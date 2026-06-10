@@ -47,10 +47,25 @@ function randomSafePort(): number {
 }
 
 export function findOpenPort(defaultPort?: number): number {
+  const requestedPort = defaultPort;
   defaultPort = defaultPort || randomSafePort();
   if (isPortAvailableSync({ port: defaultPort, hostname: kLocalhost })) {
     return defaultPort;
   } else {
+    // When a specific port was requested, increment sequentially from there
+    // (matches Vite/webpack-dev-server behavior: 4000 taken -> try 4001, 4002...)
+    if (requestedPort !== undefined) {
+      for (let p = requestedPort + 1; p < kMaxPort; ++p) {
+        if (
+          isPortSafe(p) &&
+          isPortAvailableSync({ port: p, hostname: kLocalhost })
+        ) {
+          return p;
+        }
+      }
+    }
+    // No specific port requested (or sequential scan exhausted): shuffle the
+    // full range as before so the fallback remains unpredictable/collision-free
     let ports: number[] = [];
     for (let i = kMinPort; i < kMaxPort; ++i) {
       if (isPortSafe(i)) {

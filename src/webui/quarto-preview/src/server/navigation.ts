@@ -26,6 +26,7 @@ export function navigationHandler() {
         if (target && (target !== normalizeTarget(window.location.pathname))) {
           window.location.replace(target);
         } else {
+          sessionStorage.setItem("quartoPreviewScrollY", String(window.scrollY));
           window.location.reload();
         }
         return true;

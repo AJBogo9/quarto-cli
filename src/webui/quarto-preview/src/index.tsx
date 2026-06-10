@@ -58,6 +58,13 @@ function init(options: Options) {
       handleViewerMessages(options.inputFile);
     }
 
+    // Restore scroll position after a preview reload
+    const savedScrollY = sessionStorage.getItem("quartoPreviewScrollY");
+    if (savedScrollY) {
+      sessionStorage.removeItem("quartoPreviewScrollY");
+      window.scrollTo({ top: parseInt(savedScrollY), behavior: "instant" as ScrollBehavior });
+    }
+
     // Dispatch event when initialized
     const event = new CustomEvent("quarto-preview-initialized", {
       detail: options,

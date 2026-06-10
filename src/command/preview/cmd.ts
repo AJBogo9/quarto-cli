@@ -12,7 +12,7 @@ import * as colors from "fmt/colors";
 import { Command } from "cliffy/command/mod.ts";
 
 import { kLocalhost } from "../../core/port-consts.ts";
-import { waitForPort } from "../../core/port.ts";
+import { findOpenPort, waitForPort } from "../../core/port.ts";
 import { fixupPandocArgs, parseRenderFlags } from "../render/flags.ts";
 import {
   handleRenderResult,
@@ -255,12 +255,12 @@ export const previewCommand = new Command()
     }
 
     if (options.port) {
-      // try to bind to requested port (error if its in use)
+      // try to bind to requested port, incrementing sequentially if in use
       const port = parseInt(options.port);
       if (await waitForPort({ port, hostname: kLocalhost })) {
         options.port = port;
       } else {
-        throw new Error(`Requested port ${options.port} is already in use.`);
+        options.port = findOpenPort(port);
       }
     }
 
